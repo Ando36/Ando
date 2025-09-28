@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aberration Sphérique Z₈ Annulaire</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a2e, #1e1e3f);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b35, #ff8c42);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 107, 53, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.3em;
+            color: #bbb;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        
+        #canvas-container {
+            position: relative;
+            display: inline-block;
+            border: 2px solid #ff6b35;
+            border-radius: 15px;
+            box-shadow: 0 0 60px rgba(255, 107, 53, 0.4);
+            margin: 20px 0;
+        }
+        
+        canvas {
+            display: block;
+            border-radius: 13px;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+            padding: 0 20px;
+        }
+        
+        .control-group {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .control-group label {
+            color: #ff6b35;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+        }
+        
+        .slider {
+            width: 160px;
+            height: 10px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b35, #ff8c42);
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+            border: 2px solid white;
+        }
+        
+        .value-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #ff8c42;
+            min-width: 60px;
+        }
+        
+        .info-panel {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 140, 66, 0.1));
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px auto;
+            text-align: left;
+            max-width: 800px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: rgba(255, 107, 53, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.3em;
+            text-align: center;
+            border-left: 4px solid #ff6b35;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .feature-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #ff8c42;
+        }
+        
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #ff6b35;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px auto;
+            max-width: 600px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 107, 53, 0.1);
+            border-radius: 8px;
+        }
+        
+        .stat-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #ff6b35;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            color: #ccc;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Aberration Sphérique Z₈ Flexible</h1>
+        <p class="subtitle">Surface Zernike Annulaire ou Disque Complet (Obstruction Variable)</p>
+        
+        <div id="canvas-container">
+            <canvas id="canvas" width="900" height="700"></canvas>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Amplitude Z₈</label>
+                <input type="range" class="slider" id="amplitude" min="-3.0" max="3.0" step="0.1" value="1.2">
+                <div class="value-display" id="amp-value">+1.2</div>
+                <small style="color: #ccc; margin-top: 5px; font-size: 0.8em;">
+                    + : Aberration positive<br>
+                    - : Aberration négative
+                </small>
+            </div>
+            
+            <div class="control-group">
+                <label>Rayon Intérieur</label>
+                <input type="range" class="slider" id="innerRadius" min="0.0" max="0.8" step="0.05" value="0.4">
+                <div class="value-display" id="inner-value">0.40</div>
+            </div>
+            
+            <div class="control-group">
+                <label>Rayon Extérieur</label>
+                <input type="range" class="slider" id="outerRadius" min="0.8" max="2.0" step="0.05" value="1.0">
+                <div class="value-display" id="outer-value">1.00</div>
+            </div>
+            
+            <div class="control-group">
+                <label>Résolution Mesh</label>
+                <input type="range" class="slider" id="resolution" min="64" max="256" step="16" value="128">
+                <div class="value-display" id="res-value">128</div>
+            </div>
+            
+            <div class="control-group">
+                <label>Rotation</label>
+                <input type="range" class="slider" id="rotation" min="0" max="360" step="1" value="0">
+                <div class="value-display" id="rot-value">0°</div>
+            </div>
+            
+            <div class="control-group">
+                <label>Inclinaison</label>
+                <input type="range" class="slider" id="tilt" min="0" max="45" step="1" value="0">
+                <div class="value-display" id="tilt-value">0°</div>
+            </div>
+            
+            <div class="control-group">
+                <label>Angle Caméra</label>
+                <input type="range" class="slider" id="cameraAngle" min="20" max="80" step="2" value="50">
+                <div class="value-display" id="cam-value">50°</div>
+            </div>
+            
+            <div class="control-group">
+                <label>Mode Visualisation</label>
+                <select id="visualMode" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid #ff6b35; border-radius: 8px; padding: 8px;">
+                    <option value="surface">Surface</option>
+                    <option value="wireframe">Wireframe</option>
+                    <option value="both">Surface + Wire</option>
+                    <option value="heightmap">Carte Hauteur</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="stats-panel">
+            <h3 style="text-align: center; color: #ff6b35;">Paramètres Calculés</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="surface-area">0.00</div>
+                    <div class="stat-label">Surface (u²)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="volume">0.00</div>
+                    <div class="stat-label">Volume (u³)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="max-height">0.00</div>
+                    <div class="stat-label">Hauteur Max</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="rms-height">0.00</div>
+                    <div class="stat-label">RMS Hauteur</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h3>Polynôme de Zernike Z₈ - Configuration Flexible</h3>
+            <div class="formula">
+                Z₈(ρ,θ) = A × (6ρ⁴ - 6ρ² + 1)<br>
+                ρ ∈ [ρᵢₙ, ρₒᵤₜ], θ ∈ [0, 2π]<br>
+                <small>A > 0 : Aberration positive | A < 0 : Aberration négative</small><br>
+                <small>Mode Disque si ρᵢₙ = 0</small>
+            </div>
+            
+            <div class="feature-list">
+                <div class="feature-item">
+                    <strong>Type :</strong> Aberration sphérique primaire (n=4, m=0)
+                </div>
+                <div class="feature-item">
+                    <strong>Symétrie :</strong> Radiale parfaite, indépendante de θ
+                </div>
+                <div class="feature-item">
+                    <strong>Géométrie :</strong> Annulaire ou disque complet (ρᵢₙ = 0)
+                </div>
+                <div class="feature-item">
+                    <strong>Applications :</strong> Miroirs primaires de télescopes à obstruction
+                </div>
+                <div class="feature-item">
+                    <strong>Optimisation :</strong> Minimise l'aberration sphérique résiduelle
+                </div>
+                <div class="feature-item">
+                    <strong>Contrôle :</strong> Amplitude ajustable pour correction optique
+                </div>
+            </div>
+            
+            <h4 style="color: #ff6b35; margin-top: 30px;">Aberration Sphérique Positive vs Négative :</h4>
+            <ul style="line-height: 1.8;">
+                <li><strong>Aberration Positive (A > 0) :</strong> Surface convexe au centre, concave au milieu</li>
+                <li><strong>Aberration Négative (A < 0) :</strong> Surface concave au centre, convexe au milieu</li>
+                <li><strong>Correction optique :</strong> A positif ou négatif selon le défaut à corriger</li>
+                <li><strong>Applications :</strong> Miroirs primaires (+), secondaires (-), lentilles correctrices</li>
+            </ul>
+            
+            <h4 style="color: #ff6b35; margin-top: 25px;">Caractéristiques de la Surface Flexible :</h4>
+            <ul style="line-height: 1.8;">
+                <li><strong>Mode Annulaire :</strong> ρ̃ = (ρ - ρᵢₙ) / (ρₒᵤₜ - ρᵢₙ) quand ρᵢₙ > 0</li>
+                <li><strong>Mode Disque :</strong> ρ̃ = ρ / ρₒᵤₜ quand ρᵢₙ = 0</li>
+                <li><strong>Surface active :</strong> Depuis le rayon intérieur jusqu'au rayon extérieur</li>
+                <li><strong>Flexibilité :</strong> Transition automatique entre anneau et disque</li>
+                <li><strong>Applications :</strong> Couvre tous les types d'optiques circulaires</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, surface, wireframe, group;
+        let amplitude = 1.2;
+        
+        // Initialisation de l'affichage de l'amplitude avec signe
+        document.addEventListener('DOMContentLoaded', () => {
+            const ampValue = document.getElementById('amp-value');
+            if (ampValue) {
+                const sign = amplitude >= 0 ? '+' : '';
+                ampValue.textContent = sign + amplitude.toFixed(1);
+            }
+        });
+        let innerRadius = 0.4;
+        let outerRadius = 1.0;
+        let resolution = 128;
+        
+        function init() {
+            // Création de la scène
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a1e);
+            
+            // Caméra
+            camera = new THREE.PerspectiveCamera(60, 900/700, 0.1, 1000);
+            updateCameraPosition();
+            
+            // Renderer
+            const canvas = document.getElementById('canvas');
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            renderer.setSize(900, 700);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            // Groupe principal
+            group = new THREE.Group();
+            scene.add(group);
+            
+            // Création de la surface
+            createAnnularSurface();
+            
+            // Éclairage sophistiqué
+            setupLighting();
+            
+            // Contrôles
+            setupControls();
+            
+            // Animation
+            animate();
+        }
+        
+        function zernikeZ8(rho) {
+            // Z8: Aberration sphérique - 6ρ⁴ - 6ρ² + 1
+            return 6 * Math.pow(rho, 4) - 6 * rho * rho + 1;
+        }
+        
+        function createAnnularSurface() {
+            // Suppression des anciennes géométries
+            if (surface) group.remove(surface);
+            if (wireframe) group.remove(wireframe);
+            
+            // Création de la géométrie - annulaire ou disque complet selon innerRadius
+            let geometry;
+            if (innerRadius === 0) {
+                // Disque complet quand rayon intérieur = 0
+                geometry = new THREE.CircleGeometry(outerRadius, resolution);
+            } else {
+                // Anneau normal
+                geometry = new THREE.RingGeometry(innerRadius, outerRadius, resolution, resolution/4);
+            }
+            const positions = geometry.attributes.position.array;
+            const colors = [];
+            const baseColor = { r: 0.04, g: 0.12, b: 0.28 }; // Dark blue base tone
+            const highlightColor = { r: 0.10, g: 0.28, b: 0.55 }; // Brighter dark blue for peaks
+            const inactiveColor = { r: 0.02, g: 0.07, b: 0.15 }; // Deep blue for inactive zones
+
+            let maxHeight = -Infinity;
+            let minHeight = Infinity;
+            let totalHeight = 0;
+            let totalVolume = 0;
+            let validPoints = 0;
+
+            // Modification des vertices pour appliquer Z8
+            for (let i = 0; i < positions.length; i += 3) {
+                const x = positions[i];
+                const y = positions[i + 1];
+                const rho = Math.sqrt(x * x + y * y);
+
+                if (rho >= innerRadius && rho <= outerRadius) {
+                    // Normalisation selon le mode (disque ou anneau)
+                    let normalizedRho;
+                    if (innerRadius === 0) {
+                        normalizedRho = rho / outerRadius;
+                    } else {
+                        normalizedRho = (rho - innerRadius) / (outerRadius - innerRadius);
+                    }
+                    const height = amplitude * zernikeZ8(normalizedRho);
+
+                    positions[i + 2] = height;
+
+                    // Statistiques
+                    maxHeight = Math.max(maxHeight, height);
+                    minHeight = Math.min(minHeight, height);
+                    totalHeight += Math.abs(height);
+                    totalVolume += height * (outerRadius - innerRadius) * (outerRadius - innerRadius) / (resolution * resolution);
+                    validPoints++;
+
+                    // Dark blue gradient based on height
+                    const heightRatio = (height - minHeight) / Math.max(0.001, maxHeight - minHeight);
+                    colors.push(
+                        baseColor.r + (highlightColor.r - baseColor.r) * heightRatio,
+                        baseColor.g + (highlightColor.g - baseColor.g) * heightRatio,
+                        baseColor.b + (highlightColor.b - baseColor.b) * heightRatio
+                    );
+                } else {
+                    positions[i + 2] = 0;
+                    colors.push(inactiveColor.r, inactiveColor.g, inactiveColor.b); // Deep blue for inactive zones
+                }
+            }
+
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.computeVertexNormals();
+            
+            // Materiau de surface (bleu fonce avec couleurs de sommet)
+            const surfaceMaterial = new THREE.MeshPhongMaterial({
+                vertexColors: true,
+                shininess: 80,
+                transparent: true,
+                opacity: 0.92,
+                side: THREE.DoubleSide
+            });
+
+            // Materiau wireframe - Bleu fonce
+            const wireframeMaterial = new THREE.MeshBasicMaterial({
+                color: 0x0b3d91,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.45
+            });
+            
+            // Création des meshes
+            surface = new THREE.Mesh(geometry.clone(), surfaceMaterial);
+            wireframe = new THREE.Mesh(geometry.clone(), wireframeMaterial);
+            
+            // Ajout à la scène selon le mode
+            updateVisualizationMode();
+            
+            // Mise à jour des statistiques
+            let surfaceArea;
+            if (innerRadius === 0) {
+                surfaceArea = Math.PI * outerRadius * outerRadius; // Disque complet
+            } else {
+                surfaceArea = Math.PI * (outerRadius * outerRadius - innerRadius * innerRadius); // Anneau
+            }
+            
+            updateStats({
+                surfaceArea: surfaceArea,
+                volume: Math.abs(totalVolume),
+                maxHeight: maxHeight,
+                rmsHeight: Math.sqrt(totalHeight / Math.max(1, validPoints))
+            });
+        }
+        
+        function updateVisualizationMode() {
+            // Nettoyage
+            group.remove(surface);
+            group.remove(wireframe);
+            
+            const mode = document.getElementById('visualMode').value;
+            
+            switch(mode) {
+                case 'surface':
+                    group.add(surface);
+                    break;
+                case 'wireframe':
+                    group.add(wireframe);
+                    break;
+                case 'both':
+                    group.add(surface);
+                    group.add(wireframe);
+                    break;
+                case 'heightmap':
+                    // Mode carte de hauteur avec couleurs spéciales
+                    surface.material = new THREE.MeshBasicMaterial({
+                        vertexColors: true,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    group.add(surface);
+                    break;
+            }
+        }
+        
+        function setupLighting() {
+            // Éclairage ambiant
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+            scene.add(ambientLight);
+            
+            // Lumière directionnelle principale - Orange
+            const mainLight = new THREE.DirectionalLight(0xff6b35, 1.2);
+            mainLight.position.set(5, 8, 5);
+            mainLight.castShadow = true;
+            scene.add(mainLight);
+            
+            // Lumière d'appoint - Orange chaud
+            const fillLight = new THREE.PointLight(0xff8c42, 0.6);
+            fillLight.position.set(-5, 3, -3);
+            scene.add(fillLight);
+            
+            // Lumière de rim - Blanc chaud
+            const rimLight = new THREE.SpotLight(0xffffcc, 0.8);
+            rimLight.position.set(0, 10, 0);
+            rimLight.angle = Math.PI / 4;
+            scene.add(rimLight);
+        }
+        
+        function updateCameraPosition() {
+            const angle = parseInt(document.getElementById('cameraAngle')?.value || 50);
+            const rad = angle * Math.PI / 180;
+            const distance = 4;
+            
+            camera.position.set(
+                distance * Math.sin(rad),
+                distance * Math.sin(rad * 0.7),
+                distance * Math.cos(rad)
+            );
+            camera.lookAt(0, 0, 0);
+        }
+        
+        function updateStats(stats) {
+            document.getElementById('surface-area').textContent = stats.surfaceArea.toFixed(3);
+            document.getElementById('volume').textContent = stats.volume.toFixed(4);
+            document.getElementById('max-height').textContent = stats.maxHeight.toFixed(3);
+            document.getElementById('rms-height').textContent = stats.rmsHeight.toFixed(3);
+        }
+        
+        function setupControls() {
+            const controls = {
+                amplitude: document.getElementById('amplitude'),
+                innerRadius: document.getElementById('innerRadius'),
+                outerRadius: document.getElementById('outerRadius'),
+                resolution: document.getElementById('resolution'),
+                rotation: document.getElementById('rotation'),
+                tilt: document.getElementById('tilt'),
+                cameraAngle: document.getElementById('cameraAngle'),
+                visualMode: document.getElementById('visualMode')
+            };
+            
+            const values = {
+                amp: document.getElementById('amp-value'),
+                inner: document.getElementById('inner-value'),
+                outer: document.getElementById('outer-value'),
+                res: document.getElementById('res-value'),
+                rot: document.getElementById('rot-value'),
+                tilt: document.getElementById('tilt-value'),
+                cam: document.getElementById('cam-value')
+            };
+            
+            // Amplitude
+            controls.amplitude.addEventListener('input', (e) => {
+                amplitude = parseFloat(e.target.value);
+                const sign = amplitude >= 0 ? '+' : '';
+                values.amp.textContent = sign + amplitude.toFixed(1);
+                createAnnularSurface();
+            });
+            
+            // Rayon intérieur
+            controls.innerRadius.addEventListener('input', (e) => {
+                const newInner = parseFloat(e.target.value);
+                if (newInner < outerRadius) {
+                    innerRadius = newInner;
+                    values.inner.textContent = innerRadius.toFixed(2);
+                    createAnnularSurface();
+                }
+            });
+            
+            // Rayon extérieur  
+            controls.outerRadius.addEventListener('input', (e) => {
+                const newOuter = parseFloat(e.target.value);
+                if (newOuter > innerRadius) {
+                    outerRadius = newOuter;
+                    values.outer.textContent = outerRadius.toFixed(2);
+                    createAnnularSurface();
+                }
+            });
+            
+            // Résolution
+            controls.resolution.addEventListener('input', (e) => {
+                resolution = parseInt(e.target.value);
+                values.res.textContent = resolution;
+                createAnnularSurface();
+            });
+            
+            // Rotation horizontale
+            controls.rotation.addEventListener('input', (e) => {
+                const rotation = parseInt(e.target.value);
+                values.rot.textContent = rotation + '°';
+                group.rotation.y = rotation * Math.PI / 180;
+            });
+            
+            // Inclinaison
+            controls.tilt.addEventListener('input', (e) => {
+                const tilt = parseInt(e.target.value);
+                values.tilt.textContent = tilt + '°';
+                group.rotation.x = tilt * Math.PI / 180;
+            });
+            
+            // Angle caméra
+            controls.cameraAngle.addEventListener('input', (e) => {
+                const angle = parseInt(e.target.value);
+                values.cam.textContent = angle + '°';
+                updateCameraPosition();
+            });
+            
+            // Mode visualisation
+            controls.visualMode.addEventListener('change', () => {
+                updateVisualizationMode();
+            });
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotation automatique désactivée - contrôle manuel uniquement
+            // if (!document.getElementById('rotation').matches(':focus')) {
+            //     group.rotation.y += 0.005;
+            // }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Initialisation
+        init();
+        
+        // Redimensionnement responsive
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('canvas-container');
+            const width = Math.min(window.innerWidth - 40, 900);
+            const height = (width * 700) / 900;
+            
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        });
+    </script>
+</body>
+</html>
