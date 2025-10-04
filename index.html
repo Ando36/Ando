@@ -1,667 +1,2655 @@
 <!DOCTYPE html>
+
 <html lang="fr">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aberration Sphérique Z₈ Annulaire</title>
+
+    <title>Simulateur Optique Geometrique</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
     <style>
+
+        :root {
+
+            color-scheme: dark;
+
+        }
+
+        * {
+
+            box-sizing: border-box;
+
+        }
+
         body {
+
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #0a0a2e, #1e1e3f);
-            color: white;
-            font-family: 'Arial', sans-serif;
-            overflow-x: hidden;
+
+            min-height: 100vh;
+
+            background: radial-gradient(circle at top left, #070a1e 0%, #040515 60%, #01010b 100%);
+
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+            color: #edf1ff;
+
         }
-        
-        .container {
-            text-align: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        h1 {
-            font-size: 2.8em;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #ff6b35, #ff8c42);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(255, 107, 53, 0.5);
-        }
-        
-        .subtitle {
-            font-size: 1.3em;
-            color: #bbb;
-            margin-bottom: 30px;
-            font-style: italic;
-        }
-        
-        #canvas-container {
-            position: relative;
-            display: inline-block;
-            border: 2px solid #ff6b35;
-            border-radius: 15px;
-            box-shadow: 0 0 60px rgba(255, 107, 53, 0.4);
-            margin: 20px 0;
-        }
-        
-        canvas {
-            display: block;
-            border-radius: 13px;
-        }
-        
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 25px;
-            margin: 40px 0;
-            padding: 0 20px;
-        }
-        
-        .control-group {
-            background: rgba(255, 107, 53, 0.1);
-            border: 1px solid rgba(255, 107, 53, 0.3);
-            border-radius: 12px;
-            padding: 20px;
+
+        .page {
+
+            width: 100%;
+
+            min-height: 100vh;
+
+            background: linear-gradient(180deg, rgba(16, 24, 58, 0.94), rgba(8, 12, 32, 0.96));
+
+            border: none;
+
+            border-radius: 0;
+
+            box-shadow: none;
+
             display: flex;
+
             flex-direction: column;
+
+            gap: 0;
+
+        }
+
+        .app-chrome {
+
+            display: flex;
+
             align-items: center;
-            gap: 15px;
+
+            justify-content: space-between;
+
+            padding: 18px 24px;
+
+            background: linear-gradient(180deg, rgba(18, 26, 62, 0.95), rgba(10, 16, 42, 0.95));
+
+            border-bottom: 1px solid rgba(120, 150, 255, 0.25);
+
         }
-        
-        .control-group label {
-            color: #ff6b35;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9em;
+
+        .app-controls {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
         }
-        
-        .slider {
-            width: 160px;
-            height: 10px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
+
+        .app-dot {
+
+            width: 12px;
+
+            height: 12px;
+
             border-radius: 50%;
-            background: linear-gradient(45deg, #ff6b35, #ff8c42);
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
-            border: 2px solid white;
+
+            display: inline-block;
+
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.12);
+
         }
-        
-        .value-display {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 8px 16px;
+
+        .app-dot--close {
+
+            background: #ff5f56;
+
+        }
+
+        .app-dot--minimize {
+
+            background: #ffbd2e;
+
+        }
+
+        .app-dot--maximize {
+
+            background: #27c93f;
+
+        }
+
+        .app-title {
+
+            flex: 1;
+
+            text-align: center;
+
+            font-size: 15px;
+
+            letter-spacing: 0.08em;
+
+            text-transform: uppercase;
+
+            color: #c9d5ff;
+
+        }
+
+        .app-status {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            font-size: 13px;
+
+            color: #94a9ff;
+
+        }
+
+        .status-led {
+
+            width: 8px;
+
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: #5fff99;
+
+            box-shadow: 0 0 8px rgba(95, 255, 153, 0.65);
+
+        }
+
+        header {
+
+            padding: 28px 36px 24px;
+
+            background: linear-gradient(145deg, rgba(21, 31, 75, 0.85), rgba(10, 16, 46, 0.85));
+
+            border-bottom: 1px solid rgba(120, 150, 255, 0.22);
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+
+        }
+
+        header h1 {
+
+            margin: 0;
+
+            font-size: clamp(28px, 3.8vw, 36px);
+
+            font-weight: 700;
+
+            letter-spacing: 0.02em;
+
+        }
+
+        header p {
+
+            margin: 0;
+
+            max-width: 780px;
+
+            line-height: 1.6;
+
+            color: #9eb3ff;
+
+        }
+
+        .content {
+
+            flex: 1 1 auto;
+
+            display: grid;
+
+            grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
+
+            gap: 36px;
+
+            padding: 40px 48px 56px;
+
+            align-items: stretch;
+
+            background: linear-gradient(180deg, rgba(6, 10, 32, 0.92), rgba(3, 5, 18, 0.96));
+
+        }
+
+        .visual-panel {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 28px;
+
+            background: linear-gradient(165deg, rgba(15, 26, 70, 0.94), rgba(11, 17, 46, 0.94));
+
+            border: 1px solid rgba(90, 130, 255, 0.2);
+
             border-radius: 20px;
-            font-weight: bold;
-            color: #ff8c42;
-            min-width: 60px;
+
+            padding: 28px 32px 32px;
+
+            box-shadow: inset 0 0 0 1px rgba(120, 160, 255, 0.04), 0 32px 80px rgba(6, 12, 42, 0.45);
+
+            min-height: 0;
+
+            min-width: 0;
+
         }
-        
-        .info-panel {
-            background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 140, 66, 0.1));
-            border: 2px solid rgba(255, 107, 53, 0.4);
-            border-radius: 15px;
-            padding: 30px;
-            margin: 40px auto;
-            text-align: left;
-            max-width: 800px;
-            backdrop-filter: blur(10px);
+
+        .display-header {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 18px;
+
         }
-        
-        .formula {
-            font-family: 'Courier New', monospace;
-            background: rgba(255, 107, 53, 0.2);
+
+        .display-header__titles {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 6px;
+
+        }
+
+        .display-tag {
+
+            font-size: 11px;
+
+            letter-spacing: 0.28em;
+
+            text-transform: uppercase;
+
+            color: #8aa2ff;
+
+        }
+
+        .display-header__titles h2 {
+
+            margin: 0;
+
+            font-size: 22px;
+
+            font-weight: 600;
+
+            letter-spacing: 0.02em;
+
+            color: #e6ecff;
+
+        }
+
+        .display-header__meta {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
+
+        }
+
+        .meta-chip {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            font-size: 12px;
+
+            letter-spacing: 0.08em;
+
+            text-transform: uppercase;
+
+            padding: 6px 12px;
+
+            border-radius: 999px;
+
+            background: rgba(12, 22, 60, 0.8);
+
+            border: 1px solid rgba(130, 160, 255, 0.24);
+
+            color: #b5c6ff;
+
+        }
+
+        .meta-chip::before {
+
+            content: '';
+
+            width: 6px;
+
+            height: 6px;
+
+            border-radius: 50%;
+
+            background: #7fd3ff;
+
+            box-shadow: 0 0 8px rgba(127, 211, 255, 0.8);
+
+        }
+
+        .display-shell {
+
+            position: relative;
+
+            border-radius: 18px;
+
             padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            font-size: 1.3em;
-            text-align: center;
-            border-left: 4px solid #ff6b35;
+
+            background: radial-gradient(circle at 18% 18%, rgba(30, 46, 110, 0.85), rgba(10, 16, 46, 0.9) 48%, rgba(5, 8, 30, 0.95) 100%);
+
+            border: 1px solid rgba(120, 160, 255, 0.18);
+
+            box-shadow: inset 0 0 0 1px rgba(150, 190, 255, 0.06);
+
+            overflow: hidden;
+
+            display: flex;
+
+            flex: 1 1 auto;
+
+            width: 100%;
+
+            aspect-ratio: 16 / 9;
+
+            min-height: clamp(420px, 60vh, 820px);
+
         }
-        
-        .feature-list {
+
+        .display-shell::after {
+
+            content: '';
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 18px;
+
+            background: linear-gradient(140deg, rgba(255, 255, 255, 0.04), transparent 55%);
+
+            pointer-events: none;
+
+        }
+
+        #sim-canvas {
+
+            position: relative;
+
+            z-index: 1;
+
+            flex: 1 1 auto;
+
+            width: 100%;
+
+            height: 100%;
+
+            min-height: 0;
+
+            border-radius: 12px;
+
+            background: radial-gradient(circle at center, #0b132f, #060b1f 70%, #040513);
+
+            display: block;
+
+        }
+
+        .legend {
+
+            display: flex;
+
+            align-items: center;
+
+            flex-wrap: wrap;
+
+            gap: 16px 28px;
+
+            font-size: 13px;
+
+            letter-spacing: 0.015em;
+
+            color: #a9b8ff;
+
+            padding: 12px 18px;
+
+            border-radius: 14px;
+
+            background: rgba(18, 26, 64, 0.6);
+
+            border: 1px solid rgba(110, 150, 255, 0.18);
+
+        }
+
+        .legend span {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            opacity: 0.9;
+
+        }
+
+        .chip {
+
+            width: 14px;
+
+            height: 14px;
+
+            border-radius: 50%;
+
+            display: inline-block;
+
+        }
+
+        .chip-source {
+
+            background: #ffba7d;
+
+            box-shadow: 0 0 10px rgba(255, 186, 125, 0.55);
+
+        }
+
+        .chip-ray {
+
+            background: #7cd9ff;
+
+            box-shadow: 0 0 10px rgba(124, 217, 255, 0.5);
+
+        }
+
+        .chip-lens {
+
+            background: #8296ff;
+
+        }
+
+        .chip-mirror {
+
+            background: #ffd166;
+
+        }
+
+        .control-panel {
+
+            width: 360px;
+
+            background: linear-gradient(160deg, rgba(12, 18, 48, 0.92), rgba(8, 12, 36, 0.96));
+
+            border: 1px solid rgba(124, 169, 255, 0.25);
+
+            border-radius: 20px;
+
+            padding: 28px 26px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 28px;
+
+            box-shadow: inset 0 0 0 1px rgba(140, 170, 255, 0.06), 0 24px 70px rgba(8, 12, 40, 0.5);
+
+            max-height: calc(100vh - 220px);
+
+            overflow: hidden;
+
+            overflow-y: auto;
+
+            scrollbar-width: thin;
+
+            scrollbar-gutter: stable;
+
+        }
+
+        .control-panel::-webkit-scrollbar {
+
+            width: 6px;
+
+        }
+
+        .control-panel::-webkit-scrollbar-track {
+
+            background: rgba(8, 12, 32, 0.6);
+
+        }
+
+        .control-panel::-webkit-scrollbar-thumb {
+
+            background: rgba(120, 155, 255, 0.45);
+
+            border-radius: 999px;
+
+        }
+
+        .control-panel::-webkit-scrollbar {
+
+            width: 6px;
+
+        }
+
+        .control-panel::-webkit-scrollbar-track {
+
+            background: rgba(8, 12, 32, 0.6);
+
+        }
+
+        .control-panel::-webkit-scrollbar-thumb {
+
+            background: rgba(120, 155, 255, 0.45);
+
+            border-radius: 999px;
+
+        }
+
+        .control-section {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 20px;
+
+        }
+
+        .control-section h2 {
+
+            margin: 0;
+
+            font-size: 16px;
+
+            font-weight: 600;
+
+            letter-spacing: 0.06em;
+
+            color: #dae3ff;
+
+            text-transform: uppercase;
+
+        }
+
+        .field {
+
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 25px;
+
+            grid-template-columns: 1fr auto;
+
+            grid-template-rows: auto auto;
+
+            grid-template-areas:
+
+                "label value"
+
+                "control control";
+
+            gap: 14px;
+
+            padding: 18px 20px;
+
+            border-radius: 16px;
+
+            background: linear-gradient(180deg, rgba(18, 24, 58, 0.75), rgba(9, 14, 40, 0.85));
+
+            border: 1px solid rgba(90, 130, 255, 0.22);
+
+            color: #dfe6ff;
+
+            font-size: 14px;
+
         }
-        
-        .feature-item {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 3px solid #ff8c42;
+
+        .field span {
+
+            grid-area: label;
+
+            font-weight: 600;
+
+            letter-spacing: 0.04em;
+
+            text-transform: uppercase;
+
+            color: #9fb4ff;
+
         }
-        
-        .stats-panel {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid #ff6b35;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 30px auto;
-            max-width: 600px;
+
+        .field select,
+
+        .field select {
+
+            appearance: none;
+
+            background: rgba(12, 18, 48, 0.9);
+
+            border: 1px solid rgba(112, 146, 255, 0.35);
+
+            border-radius: 12px;
+
+            padding: 10px 14px;
+
+            color: #f4f7ff;
+
+            font-family: inherit;
+
+            font-size: 14px;
+
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
         }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+
+        .field input[type="range"] {
+
+            --progress: 0%;
+
+            appearance: none;
+
+            height: 10px;
+
+            border-radius: 999px;
+
+            background: linear-gradient(90deg, rgba(120, 190, 255, 0.9) 0%, rgba(120, 190, 255, 0.9) var(--progress), rgba(28, 36, 68, 0.9) var(--progress), rgba(28, 36, 68, 0.9) 100%);
+
+            box-shadow: inset 0 0 0 1px rgba(120, 160, 255, 0.25);
+
+            transition: background-size 0.2s ease;
+
         }
-        
-        .stat-item {
+
+        .field input[type="range"]::-webkit-slider-runnable-track {
+
+            height: 10px;
+
+            border-radius: 999px;
+
+            background: transparent;
+
+        }
+
+        .field input[type="range"]::-webkit-slider-thumb {
+
+            appearance: none;
+
+            width: 18px;
+
+            height: 18px;
+
+            border-radius: 50%;
+
+            background: #c8dcff;
+
+            border: 2px solid #4f7fff;
+
+            box-shadow: 0 0 0 4px rgba(80, 130, 255, 0.25);
+
+            cursor: pointer;
+
+            transition: transform 0.15s ease;
+
+        }
+
+        .field input[type="range"]::-webkit-slider-thumb:hover {
+
+            transform: scale(1.05);
+
+        }
+
+        .field input[type="range"]::-webkit-slider-thumb:active {
+
+            transform: scale(0.98);
+
+        }
+
+        .field input[type="range"]::-moz-range-track {
+
+            height: 10px;
+
+            border-radius: 999px;
+
+            background: rgba(28, 36, 68, 0.9);
+
+        }
+
+        .field input[type="range"]::-moz-range-progress {
+
+            height: 10px;
+
+            border-radius: 999px;
+
+            background: rgba(120, 190, 255, 0.9);
+
+        }
+
+        .field input[type="range"]::-moz-range-thumb {
+
+            width: 18px;
+
+            height: 18px;
+
+            border-radius: 50%;
+
+            background: #c8dcff;
+
+            border: 2px solid #4f7fff;
+
+            box-shadow: 0 0 0 4px rgba(80, 130, 255, 0.25);
+
+            cursor: pointer;
+
+            transition: transform 0.15s ease;
+
+        }
+
+        .field input[type="range"]:focus-visible {
+
+            outline: none;
+
+            box-shadow: 0 0 0 3px rgba(124, 186, 255, 0.4);
+
+        }
+
+        .field output {
+
+            grid-area: value;
+
+            font-variant-numeric: tabular-nums;
+
+            font-size: 13px;
+
+            color: #a9b8ff;
+
+            justify-self: end;
+
+            align-self: center;
+
+        }
+
+        .element-card {
+
+            background: linear-gradient(180deg, rgba(12, 18, 48, 0.88), rgba(6, 12, 32, 0.95));
+
+            border: 1px solid rgba(96, 140, 255, 0.3);
+
+            border-radius: 18px;
+
+            padding: 18px 20px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 18px;
+
+            box-shadow: inset 0 0 0 1px rgba(130, 170, 255, 0.08);
+
+        }
+
+        .element-card__header {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            color: #dbe2ff;
+
+        }
+
+        .element-card__type {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            font-size: 12px;
+
+            padding: 4px 10px;
+
+            border-radius: 999px;
+
+            background: rgba(120, 150, 255, 0.16);
+
+            color: #9fb4ff;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.1em;
+
+        }
+
+        button {
+
+            font-family: inherit;
+
+            border: none;
+
+            cursor: pointer;
+
+        }
+
+        .button {
+
+            border-radius: 12px;
+
+            padding: 10px 18px;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            letter-spacing: 0.02em;
+
+            color: #09122f;
+
+            background: linear-gradient(140deg, #7fd3ff, #6e9fff);
+
+            transition: transform 0.12s ease, box-shadow 0.12s ease;
+
+        }
+
+        .button:hover {
+
+            transform: translateY(-1px);
+
+            box-shadow: 0 12px 24px rgba(110, 162, 255, 0.35);
+
+        }
+
+        .button:active {
+
+            transform: translateY(0);
+
+            box-shadow: 0 6px 18px rgba(110, 162, 255, 0.3);
+
+        }
+
+        .button--ghost {
+
+            background: rgba(125, 145, 255, 0.14);
+
+            color: #dbe2ff;
+
+        }
+
+        .button-row {
+
+            display: flex;
+
+            gap: 12px;
+
+            flex-wrap: wrap;
+
+        }
+
+        .placeholder {
+
+            font-size: 13px;
+
+            color: #8995d6;
+
+            background: rgba(20, 24, 52, 0.65);
+
+            border: 1px dashed rgba(110, 142, 255, 0.35);
+
+            border-radius: 12px;
+
+            padding: 14px;
+
             text-align: center;
-            padding: 10px;
-            background: rgba(255, 107, 53, 0.1);
-            border-radius: 8px;
+
         }
-        
-        .stat-value {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #ff6b35;
+
+        @media (max-width: 1180px) {
+
+            .content {
+
+                grid-template-columns: 1fr;
+
+                padding: 32px 32px 48px;
+
+            }
+
+            .control-panel {
+
+                width: 100%;
+
+                max-height: none;
+
+            }
+
         }
-        
-        .stat-label {
-            font-size: 0.8em;
-            color: #ccc;
-            margin-top: 5px;
+
+        @media (max-width: 780px) {
+
+            .content {
+
+                padding: 20px;
+
+                gap: 24px;
+
+            }
+
+            .visual-panel {
+
+                padding: 20px;
+
+            }
+
+            .control-panel {
+
+                width: 100%;
+
+            }
+
         }
+
     </style>
+
 </head>
+
 <body>
-    <div class="container">
-        <h1>Aberration Sphérique Z₈ Flexible</h1>
-        <p class="subtitle">Surface Zernike Annulaire ou Disque Complet (Obstruction Variable)</p>
-        
-        <div id="canvas-container">
-            <canvas id="canvas" width="900" height="700"></canvas>
+
+    <div class="page">
+
+        <div class="app-chrome">
+
+            <div class="app-controls">
+
+                <span class="app-dot app-dot--close"></span>
+
+                <span class="app-dot app-dot--minimize"></span>
+
+                <span class="app-dot app-dot--maximize"></span>
+
+            </div>
+
+            <div class="app-title">OptiScope Studio &bull; Annulaire Z8</div>
+
+            <div class="app-status">
+
+                <span class="status-led"></span>
+
+                Simulation active
+
+            </div>
+
         </div>
-        
-        <div class="controls">
-            <div class="control-group">
-                <label>Amplitude Z₈</label>
-                <input type="range" class="slider" id="amplitude" min="-3.0" max="3.0" step="0.1" value="1.2">
-                <div class="value-display" id="amp-value">+1.2</div>
-                <small style="color: #ccc; margin-top: 5px; font-size: 0.8em;">
-                    + : Aberration positive<br>
-                    - : Aberration négative
-                </small>
-            </div>
-            
-            <div class="control-group">
-                <label>Rayon Intérieur</label>
-                <input type="range" class="slider" id="innerRadius" min="0.0" max="0.8" step="0.05" value="0.4">
-                <div class="value-display" id="inner-value">0.40</div>
-            </div>
-            
-            <div class="control-group">
-                <label>Rayon Extérieur</label>
-                <input type="range" class="slider" id="outerRadius" min="0.8" max="2.0" step="0.05" value="1.0">
-                <div class="value-display" id="outer-value">1.00</div>
-            </div>
-            
-            <div class="control-group">
-                <label>Résolution Mesh</label>
-                <input type="range" class="slider" id="resolution" min="64" max="256" step="16" value="128">
-                <div class="value-display" id="res-value">128</div>
-            </div>
-            
-            <div class="control-group">
-                <label>Rotation</label>
-                <input type="range" class="slider" id="rotation" min="0" max="360" step="1" value="0">
-                <div class="value-display" id="rot-value">0°</div>
-            </div>
-            
-            <div class="control-group">
-                <label>Inclinaison</label>
-                <input type="range" class="slider" id="tilt" min="0" max="45" step="1" value="0">
-                <div class="value-display" id="tilt-value">0°</div>
-            </div>
-            
-            <div class="control-group">
-                <label>Angle Caméra</label>
-                <input type="range" class="slider" id="cameraAngle" min="20" max="80" step="2" value="50">
-                <div class="value-display" id="cam-value">50°</div>
-            </div>
-            
-            <div class="control-group">
-                <label>Mode Visualisation</label>
-                <select id="visualMode" style="background: rgba(0,0,0,0.5); color: white; border: 1px solid #ff6b35; border-radius: 8px; padding: 8px;">
-                    <option value="surface">Surface</option>
-                    <option value="wireframe">Wireframe</option>
-                    <option value="both">Surface + Wire</option>
-                    <option value="heightmap">Carte Hauteur</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="stats-panel">
-            <h3 style="text-align: center; color: #ff6b35;">Paramètres Calculés</h3>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-value" id="surface-area">0.00</div>
-                    <div class="stat-label">Surface (u²)</div>
+
+        <header>
+
+            <h1>Simulateur optique geometrique</h1>
+
+            <p>Explorez le trajet des rayons lumineux dans un banc optique virtuel, ajustez les parametres et observez les changements en temps reel.</p>
+
+        </header>
+
+        <main class="content">
+
+            <section class="visual-panel">
+
+                <div class="display-header">
+
+                    <div class="display-header__titles">
+
+                        <span class="display-tag">Table de travail</span>
+
+                        <h2>Vue de simulation</h2>
+
+                    </div>
+
+                    <div class="display-header__meta">
+
+                        <span class="meta-chip">Module annulaire Z8</span>
+
+                        <span class="meta-chip">Calcul live</span>
+
+                    </div>
+
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="volume">0.00</div>
-                    <div class="stat-label">Volume (u³)</div>
+
+                <div class="display-shell">
+
+                    <canvas id="sim-canvas"></canvas>
+
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="max-height">0.00</div>
-                    <div class="stat-label">Hauteur Max</div>
+
+                <div class="legend">
+
+                    <span><span class="chip chip-source"></span> Source ponctuelle</span>
+
+                    <span><span class="chip chip-ray"></span> Rayon lumineux</span>
+
+                    <span><span class="chip chip-lens"></span> Lentille mince</span>
+
+                    <span><span class="chip chip-mirror"></span> Miroir plan / spherique</span>
+
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="rms-height">0.00</div>
-                    <div class="stat-label">RMS Hauteur</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="info-panel">
-            <h3>Polynôme de Zernike Z₈ - Configuration Flexible</h3>
-            <div class="formula">
-                Z₈(ρ,θ) = A × (6ρ⁴ - 6ρ² + 1)<br>
-                ρ ∈ [ρᵢₙ, ρₒᵤₜ], θ ∈ [0, 2π]<br>
-                <small>A > 0 : Aberration positive | A < 0 : Aberration négative</small><br>
-                <small>Mode Disque si ρᵢₙ = 0</small>
-            </div>
-            
-            <div class="feature-list">
-                <div class="feature-item">
-                    <strong>Type :</strong> Aberration sphérique primaire (n=4, m=0)
-                </div>
-                <div class="feature-item">
-                    <strong>Symétrie :</strong> Radiale parfaite, indépendante de θ
-                </div>
-                <div class="feature-item">
-                    <strong>Géométrie :</strong> Annulaire ou disque complet (ρᵢₙ = 0)
-                </div>
-                <div class="feature-item">
-                    <strong>Applications :</strong> Miroirs primaires de télescopes à obstruction
-                </div>
-                <div class="feature-item">
-                    <strong>Optimisation :</strong> Minimise l'aberration sphérique résiduelle
-                </div>
-                <div class="feature-item">
-                    <strong>Contrôle :</strong> Amplitude ajustable pour correction optique
-                </div>
-            </div>
-            
-            <h4 style="color: #ff6b35; margin-top: 30px;">Aberration Sphérique Positive vs Négative :</h4>
-            <ul style="line-height: 1.8;">
-                <li><strong>Aberration Positive (A > 0) :</strong> Surface convexe au centre, concave au milieu</li>
-                <li><strong>Aberration Négative (A < 0) :</strong> Surface concave au centre, convexe au milieu</li>
-                <li><strong>Correction optique :</strong> A positif ou négatif selon le défaut à corriger</li>
-                <li><strong>Applications :</strong> Miroirs primaires (+), secondaires (-), lentilles correctrices</li>
-            </ul>
-            
-            <h4 style="color: #ff6b35; margin-top: 25px;">Caractéristiques de la Surface Flexible :</h4>
-            <ul style="line-height: 1.8;">
-                <li><strong>Mode Annulaire :</strong> ρ̃ = (ρ - ρᵢₙ) / (ρₒᵤₜ - ρᵢₙ) quand ρᵢₙ > 0</li>
-                <li><strong>Mode Disque :</strong> ρ̃ = ρ / ρₒᵤₜ quand ρᵢₙ = 0</li>
-                <li><strong>Surface active :</strong> Depuis le rayon intérieur jusqu'au rayon extérieur</li>
-                <li><strong>Flexibilité :</strong> Transition automatique entre anneau et disque</li>
-                <li><strong>Applications :</strong> Couvre tous les types d'optiques circulaires</li>
-            </ul>
-        </div>
+
+            </section>
+
+            <aside class="control-panel">
+
+                <section class="control-section">
+
+                    <h2>Source lumineuse</h2>
+
+                    <label class="field">
+
+                        <span>Hauteur</span>
+
+                        <input type="range" id="source-height" min="-220" max="220" step="1" value="0">
+
+                        <output id="source-height-value">0 mm</output>
+
+                    </label>
+
+                    <label class="field">
+
+                        <span>Angle central</span>
+
+                        <input type="range" id="source-angle" min="-35" max="35" step="0.5" value="0">
+
+                        <output id="source-angle-value">0&deg;</output>
+
+                    </label>
+
+                    <label class="field">
+
+                        <span>Eventail (&deg;)</span>
+
+                        <input type="range" id="source-spread" min="0" max="35" step="0.5" value="12">
+
+                        <output id="source-spread-value">12&deg;</output>
+
+                    </label>
+
+                    <label class="field">
+
+                        <span>Nombre de rayons</span>
+
+                        <input type="range" id="ray-count" min="1" max="15" step="1" value="5">
+
+                        <output id="ray-count-value">5</output>
+
+                    </label>
+
+                </section>
+
+                <section class="control-section">
+
+                    <h2>Elements optiques</h2>
+
+                    <div class="button-row">
+
+                        <button class="button" id="add-lens">Ajouter une lentille</button>
+
+                        <button class="button button--ghost" id="add-mirror">Ajouter un miroir</button>
+
+                        <button class="button button--ghost" id="add-hole-mirror">Miroir avec trou</button>
+
+                    </div>
+
+                    <div id="elements-container"></div>
+
+                </section>
+
+            </aside>
+
+        </main>
+
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        let scene, camera, renderer, surface, wireframe, group;
-        let amplitude = 1.2;
-        
-        // Initialisation de l'affichage de l'amplitude avec signe
-        document.addEventListener('DOMContentLoaded', () => {
-            const ampValue = document.getElementById('amp-value');
-            if (ampValue) {
-                const sign = amplitude >= 0 ? '+' : '';
-                ampValue.textContent = sign + amplitude.toFixed(1);
+
+        (() => {
+
+            const SIM = { width: 960, height: 540, margin: 80 };
+
+            let elementCounter = 1;
+
+            const state = {
+
+                source: { x: SIM.margin, height: 0, angle: 0, spread: 12, count: 5 },
+
+                elements: []
+
+            };
+
+            const createLens = () => ({
+
+                id: elementCounter++,
+
+                type: 'lens',
+
+                x: SIM.width * 0.45,
+
+                y: 0,
+
+                focalLength: 180,
+
+                aperture: 260
+
+            });
+
+            const createMirror = (withHole = false) => ({
+
+                id: elementCounter++,
+
+                type: 'mirror',
+
+                x: SIM.width * 0.75,
+
+                y: 0,
+
+                angle: 20,
+
+                length: 220,
+
+                aperture: 180,
+
+                holeRadius: withHole ? 60 : 0,
+
+                radiusOfCurvature: 0
+
+            });
+
+            state.elements.push(createLens());
+
+            state.elements.push(createMirror(true));
+
+            const canvas = document.getElementById('sim-canvas');
+
+            const ctx = canvas.getContext('2d');
+
+            const elementsContainer = document.getElementById('elements-container');
+
+            const addLensBtn = document.getElementById('add-lens');
+
+            const addMirrorBtn = document.getElementById('add-mirror');
+
+            const addHoleMirrorBtn = document.getElementById('add-hole-mirror');
+
+            const sourceHeightInput = document.getElementById('source-height');
+
+            const sourceAngleInput = document.getElementById('source-angle');
+
+            const sourceSpreadInput = document.getElementById('source-spread');
+
+            const rayCountInput = document.getElementById('ray-count');
+
+            const sourceHeightValue = document.getElementById('source-height-value');
+
+            const sourceAngleValue = document.getElementById('source-angle-value');
+
+            const sourceSpreadValue = document.getElementById('source-spread-value');
+
+            const rayCountValue = document.getElementById('ray-count-value');
+
+            let viewWidth = 0;
+
+            let viewHeight = 0;
+
+            let needsRedraw = true;
+
+            function updateSliderProgress(input) {
+                if (!input) {
+                    return;
+                }
+                const min = Number(input.min ?? 0);
+                const max = Number(input.max ?? 100);
+                const value = Number(input.value ?? 0);
+                const span = max - min || 1;
+                const percent = ((value - min) / span) * 100;
+                input.style.setProperty('--progress', `${percent}%`);
             }
-        });
-        let innerRadius = 0.4;
-        let outerRadius = 1.0;
-        let resolution = 128;
-        
-        function init() {
-            // Création de la scène
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0a1e);
-            
-            // Caméra
-            camera = new THREE.PerspectiveCamera(60, 900/700, 0.1, 1000);
-            updateCameraPosition();
-            
-            // Renderer
-            const canvas = document.getElementById('canvas');
-            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-            renderer.setSize(900, 700);
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            
-            // Groupe principal
-            group = new THREE.Group();
-            scene.add(group);
-            
-            // Création de la surface
-            createAnnularSurface();
-            
-            // Éclairage sophistiqué
-            setupLighting();
-            
-            // Contrôles
-            setupControls();
-            
-            // Animation
-            animate();
-        }
-        
-        function zernikeZ8(rho) {
-            // Z8: Aberration sphérique - 6ρ⁴ - 6ρ² + 1
-            return 6 * Math.pow(rho, 4) - 6 * rho * rho + 1;
-        }
-        
-        function createAnnularSurface() {
-            // Suppression des anciennes géométries
-            if (surface) group.remove(surface);
-            if (wireframe) group.remove(wireframe);
-            
-            // Création de la géométrie - annulaire ou disque complet selon innerRadius
-            let geometry;
-            if (innerRadius === 0) {
-                // Disque complet quand rayon intérieur = 0
-                geometry = new THREE.CircleGeometry(outerRadius, resolution);
-            } else {
-                // Anneau normal
-                geometry = new THREE.RingGeometry(innerRadius, outerRadius, resolution, resolution/4);
+
+            function bindRange(input, output, formatter, callback) {
+                const handler = () => {
+                    const value = Number(input.value);
+                    output.textContent = formatter(value);
+                    callback(value);
+                    updateSliderProgress(input);
+                    invalidate();
+                };
+                input.addEventListener('input', handler);
+                handler();
             }
-            const positions = geometry.attributes.position.array;
-            const colors = [];
-            const baseColor = { r: 0.04, g: 0.12, b: 0.28 }; // Dark blue base tone
-            const highlightColor = { r: 0.10, g: 0.28, b: 0.55 }; // Brighter dark blue for peaks
-            const inactiveColor = { r: 0.02, g: 0.07, b: 0.15 }; // Deep blue for inactive zones
 
-            let maxHeight = -Infinity;
-            let minHeight = Infinity;
-            let totalHeight = 0;
-            let totalVolume = 0;
-            let validPoints = 0;
+            bindRange(sourceHeightInput, sourceHeightValue, v => `${v.toFixed(0)} mm`, value => {
 
-            // Modification des vertices pour appliquer Z8
-            for (let i = 0; i < positions.length; i += 3) {
-                const x = positions[i];
-                const y = positions[i + 1];
-                const rho = Math.sqrt(x * x + y * y);
+                state.source.height = value;
 
-                if (rho >= innerRadius && rho <= outerRadius) {
-                    // Normalisation selon le mode (disque ou anneau)
-                    let normalizedRho;
-                    if (innerRadius === 0) {
-                        normalizedRho = rho / outerRadius;
-                    } else {
-                        normalizedRho = (rho - innerRadius) / (outerRadius - innerRadius);
+            });
+
+            bindRange(sourceAngleInput, sourceAngleValue, v => `${v.toFixed(1)}Â°`, value => {
+
+                state.source.angle = value;
+
+            });
+
+            bindRange(sourceSpreadInput, sourceSpreadValue, v => `${v.toFixed(1)}Â°`, value => {
+
+                state.source.spread = value;
+
+            });
+
+            bindRange(rayCountInput, rayCountValue, v => `${Math.round(v)}`, value => {
+
+                state.source.count = Math.round(value);
+
+            });
+
+            addLensBtn.addEventListener('click', () => {
+
+                state.elements.push(createLens());
+
+                renderElements();
+
+                invalidate();
+
+            });
+
+            addMirrorBtn.addEventListener('click', () => {
+
+                state.elements.push(createMirror());
+
+                renderElements();
+
+                invalidate();
+
+            });
+
+            addHoleMirrorBtn.addEventListener('click', () => {
+
+                state.elements.push(createMirror(true));
+
+                renderElements();
+
+                invalidate();
+
+            });
+
+            function renderElements() {
+
+                elementsContainer.innerHTML = '';
+
+                if (!state.elements.length) {
+
+                    const empty = document.createElement('div');
+
+                    empty.className = 'placeholder';
+
+                    empty.textContent = 'Ajoutez une lentille ou un miroir pour commencer la simulation.';
+
+                    elementsContainer.appendChild(empty);
+
+                    return;
+
+                }
+
+                state.elements.forEach((element, index) => {
+
+                    if (element.type === 'mirror') {
+
+                        if (element.radiusOfCurvature === undefined) {
+
+                            element.radiusOfCurvature = 0;
+
+                        }
+
+                        const isSpherical = Math.abs(element.radiusOfCurvature) > 5;
+
+                        const maxHole = isSpherical ? (element.aperture ?? 180) * 0.5 : (element.length ?? 0) * 0.5;
+
+                        const safeHole = Math.min(Math.max(element.holeRadius ?? 0, 0), maxHole);
+
+                        if (safeHole !== element.holeRadius) {
+
+                            element.holeRadius = safeHole;
+
+                        }
+
                     }
-                    const height = amplitude * zernikeZ8(normalizedRho);
 
-                    positions[i + 2] = height;
+                    const card = document.createElement('div');
 
-                    // Statistiques
-                    maxHeight = Math.max(maxHeight, height);
-                    minHeight = Math.min(minHeight, height);
-                    totalHeight += Math.abs(height);
-                    totalVolume += height * (outerRadius - innerRadius) * (outerRadius - innerRadius) / (resolution * resolution);
-                    validPoints++;
+                    card.className = 'element-card';
 
-                    // Dark blue gradient based on height
-                    const heightRatio = (height - minHeight) / Math.max(0.001, maxHeight - minHeight);
-                    colors.push(
-                        baseColor.r + (highlightColor.r - baseColor.r) * heightRatio,
-                        baseColor.g + (highlightColor.g - baseColor.g) * heightRatio,
-                        baseColor.b + (highlightColor.b - baseColor.b) * heightRatio
-                    );
-                } else {
-                    positions[i + 2] = 0;
-                    colors.push(inactiveColor.r, inactiveColor.g, inactiveColor.b); // Deep blue for inactive zones
-                }
-            }
+                    const header = document.createElement('div');
 
-            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-            geometry.computeVertexNormals();
-            
-            // Materiau de surface (bleu fonce avec couleurs de sommet)
-            const surfaceMaterial = new THREE.MeshPhongMaterial({
-                vertexColors: true,
-                shininess: 80,
-                transparent: true,
-                opacity: 0.92,
-                side: THREE.DoubleSide
-            });
+                    header.className = 'element-card__header';
 
-            // Materiau wireframe - Bleu fonce
-            const wireframeMaterial = new THREE.MeshBasicMaterial({
-                color: 0x0b3d91,
-                wireframe: true,
-                transparent: true,
-                opacity: 0.45
-            });
-            
-            // Création des meshes
-            surface = new THREE.Mesh(geometry.clone(), surfaceMaterial);
-            wireframe = new THREE.Mesh(geometry.clone(), wireframeMaterial);
-            
-            // Ajout à la scène selon le mode
-            updateVisualizationMode();
-            
-            // Mise à jour des statistiques
-            let surfaceArea;
-            if (innerRadius === 0) {
-                surfaceArea = Math.PI * outerRadius * outerRadius; // Disque complet
-            } else {
-                surfaceArea = Math.PI * (outerRadius * outerRadius - innerRadius * innerRadius); // Anneau
-            }
-            
-            updateStats({
-                surfaceArea: surfaceArea,
-                volume: Math.abs(totalVolume),
-                maxHeight: maxHeight,
-                rmsHeight: Math.sqrt(totalHeight / Math.max(1, validPoints))
-            });
-        }
-        
-        function updateVisualizationMode() {
-            // Nettoyage
-            group.remove(surface);
-            group.remove(wireframe);
-            
-            const mode = document.getElementById('visualMode').value;
-            
-            switch(mode) {
-                case 'surface':
-                    group.add(surface);
-                    break;
-                case 'wireframe':
-                    group.add(wireframe);
-                    break;
-                case 'both':
-                    group.add(surface);
-                    group.add(wireframe);
-                    break;
-                case 'heightmap':
-                    // Mode carte de hauteur avec couleurs spéciales
-                    surface.material = new THREE.MeshBasicMaterial({
-                        vertexColors: true,
-                        transparent: true,
-                        opacity: 0.8
+                    const title = document.createElement('div');
+
+                    title.textContent = `Ã‰lÃ©ment ${index + 1}`;
+
+                    const tag = document.createElement('span');
+
+                    tag.className = 'element-card__type';
+
+                    tag.textContent = element.type === 'lens' ? 'Lentille' : 'Miroir';
+
+                    header.appendChild(title);
+
+                    header.appendChild(tag);
+
+                    card.appendChild(header);
+
+                    card.appendChild(renderSelectField('Type', element.type, value => {
+
+                        if (value === element.type) {
+
+                            return;
+
+                        }
+
+                        element.type = value;
+
+                        if (value === 'lens') {
+
+                            element.focalLength = element.focalLength ?? 160;
+
+                            element.aperture = element.aperture ?? 240;
+
+                        } else {
+
+                            element.angle = element.angle ?? 0;
+
+                            element.length = element.length ?? 200;
+
+                            element.holeRadius = element.holeRadius ?? 0;
+
+                        }
+
+                        renderElements();
+
+                        invalidate();
+
+                    }));
+
+                    card.appendChild(renderRangeField('Position X', 70, SIM.width - 70, 1, element.x, v => `${Math.round(v)} mm`, value => {
+
+                        element.x = value;
+
+                    }));
+
+                    card.appendChild(renderRangeField('DÃ©calage Y', -SIM.height / 2 + 40, SIM.height / 2 - 40, 1, element.y, v => `${Math.round(v)} mm`, value => {
+
+                        element.y = value;
+
+                    }));
+
+                    if (element.type === 'lens') {
+
+                        card.appendChild(renderRangeField('Focale', -320, 320, 5, element.focalLength, v => `${Math.round(v)} mm`, value => {
+
+                            element.focalLength = value;
+
+                        }));
+
+                        card.appendChild(renderRangeField('Ouverture', 60, 420, 5, element.aperture, v => `${Math.round(v)} mm`, value => {
+
+                            element.aperture = value;
+
+                        }));
+
+                    } else {
+
+                        card.appendChild(renderRangeField('Angle', -75, 75, 1, element.angle, v => `${v.toFixed(0)}Â°`, value => {
+
+                            element.angle = value;
+
+                        }));
+
+                        card.appendChild(renderRangeField('Rayon de courbure', -800, 800, 10, element.radiusOfCurvature ?? 0, v => {
+
+                            if (Math.abs(v) < 5) return 'Plan (infini)';
+
+                            return `${Math.round(v)} mm ${v > 0 ? '(concave)' : '(convexe)'}`;
+
+                        }, value => {
+
+                            element.radiusOfCurvature = value;
+
+                            if (Math.abs(value) > 5) {
+
+                                if (!element.aperture) {
+
+                                    element.aperture = 180;
+
+                                }
+
+                            }
+
+                            renderElements();
+
+                        }));
+
+                        const isSpherical = Math.abs(element.radiusOfCurvature ?? 0) > 5;
+
+                        if (isSpherical) {
+
+                            card.appendChild(renderRangeField('Ouverture', 60, 400, 10, element.aperture ?? 180, v => `${Math.round(v)} mm`, value => {
+
+                                element.aperture = value;
+
+                                if ((element.holeRadius ?? 0) > value * 0.5) {
+
+                                    element.holeRadius = value * 0.5;
+
+                                    renderElements();
+
+                                }
+
+                            }));
+
+                        } else {
+
+                            card.appendChild(renderRangeField('Longueur', 80, 360, 5, element.length, v => `${Math.round(v)} mm`, value => {
+
+                                element.length = value;
+
+                                if ((element.holeRadius ?? 0) > value * 0.5) {
+
+                                    element.holeRadius = value * 0.5;
+
+                                    renderElements();
+
+                                }
+
+                            }));
+
+                        }
+
+                        const maxHoleSize = isSpherical ? (element.aperture ?? 180) * 0.5 : element.length * 0.5;
+
+                        card.appendChild(renderRangeField('Rayon du trou', 0, Math.round(maxHoleSize), 1, element.holeRadius ?? 0, v => `${Math.round(v)} mm`, value => {
+
+                            element.holeRadius = Math.min(value, maxHoleSize);
+
+                            if (value > maxHoleSize) {
+
+                                renderElements();
+
+                            }
+
+                        }));
+
+                    }
+
+                    const actions = document.createElement('div');
+
+                    actions.className = 'button-row';
+
+                    const deleteBtn = document.createElement('button');
+
+                    deleteBtn.className = 'button button--ghost';
+
+                    deleteBtn.textContent = 'Supprimer';
+
+                    deleteBtn.addEventListener('click', () => {
+
+                        state.elements.splice(index, 1);
+
+                        renderElements();
+
+                        invalidate();
+
                     });
-                    group.add(surface);
-                    break;
+
+                    actions.appendChild(deleteBtn);
+
+                    card.appendChild(actions);
+
+                    elementsContainer.appendChild(card);
+
+                });
+
             }
-        }
-        
-        function setupLighting() {
-            // Éclairage ambiant
-            const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
-            scene.add(ambientLight);
-            
-            // Lumière directionnelle principale - Orange
-            const mainLight = new THREE.DirectionalLight(0xff6b35, 1.2);
-            mainLight.position.set(5, 8, 5);
-            mainLight.castShadow = true;
-            scene.add(mainLight);
-            
-            // Lumière d'appoint - Orange chaud
-            const fillLight = new THREE.PointLight(0xff8c42, 0.6);
-            fillLight.position.set(-5, 3, -3);
-            scene.add(fillLight);
-            
-            // Lumière de rim - Blanc chaud
-            const rimLight = new THREE.SpotLight(0xffffcc, 0.8);
-            rimLight.position.set(0, 10, 0);
-            rimLight.angle = Math.PI / 4;
-            scene.add(rimLight);
-        }
-        
-        function updateCameraPosition() {
-            const angle = parseInt(document.getElementById('cameraAngle')?.value || 50);
-            const rad = angle * Math.PI / 180;
-            const distance = 4;
-            
-            camera.position.set(
-                distance * Math.sin(rad),
-                distance * Math.sin(rad * 0.7),
-                distance * Math.cos(rad)
-            );
-            camera.lookAt(0, 0, 0);
-        }
-        
-        function updateStats(stats) {
-            document.getElementById('surface-area').textContent = stats.surfaceArea.toFixed(3);
-            document.getElementById('volume').textContent = stats.volume.toFixed(4);
-            document.getElementById('max-height').textContent = stats.maxHeight.toFixed(3);
-            document.getElementById('rms-height').textContent = stats.rmsHeight.toFixed(3);
-        }
-        
-        function setupControls() {
-            const controls = {
-                amplitude: document.getElementById('amplitude'),
-                innerRadius: document.getElementById('innerRadius'),
-                outerRadius: document.getElementById('outerRadius'),
-                resolution: document.getElementById('resolution'),
-                rotation: document.getElementById('rotation'),
-                tilt: document.getElementById('tilt'),
-                cameraAngle: document.getElementById('cameraAngle'),
-                visualMode: document.getElementById('visualMode')
-            };
-            
-            const values = {
-                amp: document.getElementById('amp-value'),
-                inner: document.getElementById('inner-value'),
-                outer: document.getElementById('outer-value'),
-                res: document.getElementById('res-value'),
-                rot: document.getElementById('rot-value'),
-                tilt: document.getElementById('tilt-value'),
-                cam: document.getElementById('cam-value')
-            };
-            
-            // Amplitude
-            controls.amplitude.addEventListener('input', (e) => {
-                amplitude = parseFloat(e.target.value);
-                const sign = amplitude >= 0 ? '+' : '';
-                values.amp.textContent = sign + amplitude.toFixed(1);
-                createAnnularSurface();
-            });
-            
-            // Rayon intérieur
-            controls.innerRadius.addEventListener('input', (e) => {
-                const newInner = parseFloat(e.target.value);
-                if (newInner < outerRadius) {
-                    innerRadius = newInner;
-                    values.inner.textContent = innerRadius.toFixed(2);
-                    createAnnularSurface();
+
+            function renderSelectField(labelText, currentValue, onChange) {
+
+                const wrapper = document.createElement('label');
+
+                wrapper.className = 'field';
+
+                const label = document.createElement('span');
+
+                label.textContent = labelText;
+
+                const select = document.createElement('select');
+
+                const lensOption = document.createElement('option');
+
+                lensOption.value = 'lens';
+
+                lensOption.textContent = 'Lentille mince';
+
+                const mirrorOption = document.createElement('option');
+
+                mirrorOption.value = 'mirror';
+
+                mirrorOption.textContent = 'Miroir plan';
+
+                select.appendChild(lensOption);
+
+                select.appendChild(mirrorOption);
+
+                select.value = currentValue;
+
+                select.addEventListener('change', event => {
+
+                    onChange(event.target.value);
+
+                });
+
+                const output = document.createElement('output');
+
+                output.textContent = currentValue === 'lens' ? 'Lentille' : 'Miroir';
+
+                select.addEventListener('change', event => {
+
+                    output.textContent = event.target.value === 'lens' ? 'Lentille' : 'Miroir';
+
+                });
+
+                wrapper.appendChild(label);
+
+                wrapper.appendChild(select);
+
+                wrapper.appendChild(output);
+
+                return wrapper;
+
+            }
+
+            function renderRangeField(labelText, min, max, step, value, formatter, onInput) {
+                const wrapper = document.createElement('label');
+                wrapper.className = 'field';
+                const label = document.createElement('span');
+                label.textContent = labelText;
+                const input = document.createElement('input');
+                input.type = 'range';
+                input.min = String(min);
+                input.max = String(max);
+                input.step = String(step);
+                input.value = String(value);
+                const output = document.createElement('output');
+                output.textContent = formatter(Number(value));
+                input.addEventListener('input', event => {
+                    const target = event.target;
+                    const val = Number(target.value);
+                    output.textContent = formatter(val);
+                    onInput(val);
+                    updateSliderProgress(target);
+                    invalidate();
+                });
+                updateSliderProgress(input);
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                wrapper.appendChild(output);
+                return wrapper;
+            }
+
+            function invalidate() {
+
+                needsRedraw = true;
+
+            }
+
+            function resizeCanvas() {
+
+                const rect = canvas.getBoundingClientRect();
+
+                const dpr = window.devicePixelRatio || 1;
+
+                canvas.width = rect.width * dpr;
+
+                canvas.height = rect.height * dpr;
+
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.scale(dpr, dpr);
+
+                viewWidth = rect.width;
+
+                viewHeight = rect.height;
+
+                invalidate();
+
+            }
+
+            window.addEventListener('resize', resizeCanvas);
+
+            resizeCanvas();
+
+            renderElements();
+
+            invalidate();
+
+            function toCanvas(point) {
+
+                return { x: mapX(point.x), y: mapY(point.y) };
+
+            }
+
+            function mapX(x) {
+
+                return (x / SIM.width) * viewWidth;
+
+            }
+
+            function mapY(y) {
+
+                return viewHeight * 0.5 - (y / SIM.height) * viewHeight;
+
+            }
+
+            function normalize(vec) {
+
+                const length = Math.hypot(vec.x, vec.y);
+
+                if (!length) {
+
+                    return { x: 0, y: 0 };
+
                 }
-            });
-            
-            // Rayon extérieur  
-            controls.outerRadius.addEventListener('input', (e) => {
-                const newOuter = parseFloat(e.target.value);
-                if (newOuter > innerRadius) {
-                    outerRadius = newOuter;
-                    values.outer.textContent = outerRadius.toFixed(2);
-                    createAnnularSurface();
+
+                return { x: vec.x / length, y: vec.y / length };
+
+            }
+
+            function reflect(direction, normal) {
+
+                const dot = direction.x * normal.x + direction.y * normal.y;
+
+                return normalize({
+
+                    x: direction.x - 2 * dot * normal.x,
+
+                    y: direction.y - 2 * dot * normal.y
+
+                });
+
+            }
+
+            function moveAlong(point, direction, distance) {
+
+                return {
+
+                    x: point.x + direction.x * distance,
+
+                    y: point.y + direction.y * distance
+
+                };
+
+            }
+
+            function applyLens(direction, hitPoint, lens) {
+
+                if (Math.abs(direction.x) < 1e-5) {
+
+                    return direction;
+
                 }
-            });
-            
-            // Résolution
-            controls.resolution.addEventListener('input', (e) => {
-                resolution = parseInt(e.target.value);
-                values.res.textContent = resolution;
-                createAnnularSurface();
-            });
-            
-            // Rotation horizontale
-            controls.rotation.addEventListener('input', (e) => {
-                const rotation = parseInt(e.target.value);
-                values.rot.textContent = rotation + '°';
-                group.rotation.y = rotation * Math.PI / 180;
-            });
-            
-            // Inclinaison
-            controls.tilt.addEventListener('input', (e) => {
-                const tilt = parseInt(e.target.value);
-                values.tilt.textContent = tilt + '°';
-                group.rotation.x = tilt * Math.PI / 180;
-            });
-            
-            // Angle caméra
-            controls.cameraAngle.addEventListener('input', (e) => {
-                const angle = parseInt(e.target.value);
-                values.cam.textContent = angle + '°';
-                updateCameraPosition();
-            });
-            
-            // Mode visualisation
-            controls.visualMode.addEventListener('change', () => {
-                updateVisualizationMode();
-            });
-        }
-        
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            // Rotation automatique désactivée - contrôle manuel uniquement
-            // if (!document.getElementById('rotation').matches(':focus')) {
-            //     group.rotation.y += 0.005;
-            // }
-            
-            renderer.render(scene, camera);
-        }
-        
-        // Initialisation
-        init();
-        
-        // Redimensionnement responsive
-        window.addEventListener('resize', () => {
-            const container = document.getElementById('canvas-container');
-            const width = Math.min(window.innerWidth - 40, 900);
-            const height = (width * 700) / 900;
-            
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-            renderer.setSize(width, height);
-        });
+
+                const effective = (() => {
+
+                    if (Math.abs(lens.focalLength) < 5) {
+
+                        return lens.focalLength < 0 ? -5 : 5;
+
+                    }
+
+                    return lens.focalLength;
+
+                })();
+
+                const slope = direction.y / direction.x;
+
+                const displacement = hitPoint.y - lens.y;
+
+                const newSlope = slope - displacement / effective;
+
+                const sign = direction.x >= 0 ? 1 : -1;
+
+                const magnitude = Math.sqrt(1 + newSlope * newSlope);
+
+                return {
+
+                    x: sign / magnitude,
+
+                    y: (newSlope * sign) / magnitude
+
+                };
+
+            }
+
+            function intersectMirror(element, origin, direction) {
+
+                if (Math.abs(element.radiusOfCurvature ?? 0) > 5) {
+
+                    return intersectSphericalMirror(element, origin, direction);
+
+                }
+
+                const angle = element.angle * Math.PI / 180;
+
+                const tangent = { x: Math.sin(angle), y: Math.cos(angle) };
+
+                const normal = { x: Math.cos(angle), y: -Math.sin(angle) };
+
+                const cx = element.x;
+
+                const cy = element.y;
+
+                const det = direction.y * tangent.x - direction.x * tangent.y;
+
+                if (Math.abs(det) < 1e-6) {
+
+                    return null;
+
+                }
+
+                const dx = cx - origin.x;
+
+                const dy = cy - origin.y;
+
+                const t = (dx * -tangent.y + dy * tangent.x) / det;
+
+                if (t <= 1e-4) {
+
+                    return null;
+
+                }
+
+                const u = (direction.x * dy - direction.y * dx) / det;
+
+                if (Math.abs(u) > element.length * 0.5) {
+
+                    return null;
+
+                }
+
+                const holeRadius = Math.max(0, element.holeRadius ?? 0);
+
+                if (holeRadius > 0 && Math.abs(u) < holeRadius) {
+
+                    return null;
+
+                }
+
+                const point = {
+
+                    x: origin.x + direction.x * t,
+
+                    y: origin.y + direction.y * t
+
+                };
+
+                return { t, point, normal };
+
+            }
+
+            function intersectSphericalMirror(element, origin, direction) {
+
+                const angle = element.angle * Math.PI / 180;
+
+                const radius = element.radiusOfCurvature ?? 0;
+
+                const absR = Math.abs(radius);
+
+                if (absR <= 5) {
+
+                    return null;
+
+                }
+
+                const baseNormal = { x: Math.cos(angle), y: -Math.sin(angle) };
+
+                const tangent = { x: Math.sin(angle), y: Math.cos(angle) };
+
+                const centerX = element.x - baseNormal.x * radius;
+
+                const centerY = element.y - baseNormal.y * radius;
+
+                const dx = origin.x - centerX;
+
+                const dy = origin.y - centerY;
+
+                const a = direction.x * direction.x + direction.y * direction.y;
+
+                const b = 2 * (dx * direction.x + dy * direction.y);
+
+                const c = dx * dx + dy * dy - absR * absR;
+
+                const discriminant = b * b - 4 * a * c;
+
+                if (discriminant < 0) {
+
+                    return null;
+
+                }
+
+                const sqrtDisc = Math.sqrt(discriminant);
+
+                const t1 = (-b - sqrtDisc) / (2 * a);
+
+                const t2 = (-b + sqrtDisc) / (2 * a);
+
+                const aperture = element.aperture ?? element.length ?? 180;
+
+                const halfAperture = aperture * 0.5;
+
+                const holeRadius = Math.max(0, element.holeRadius ?? 0);
+
+                const evaluate = (t) => {
+
+                    if (t <= 1e-4) return null;
+
+                    const point = {
+
+                        x: origin.x + direction.x * t,
+
+                        y: origin.y + direction.y * t
+
+                    };
+
+                    const offsetX = point.x - element.x;
+
+                    const offsetY = point.y - element.y;
+
+                    const lateral = offsetX * tangent.x + offsetY * tangent.y;
+
+                    if (Math.abs(lateral) > halfAperture) {
+
+                        return null;
+
+                    }
+
+                    if (holeRadius > 0 && Math.abs(lateral) < holeRadius) {
+
+                        return null;
+
+                    }
+
+                    let normal = normalize({
+
+                        x: point.x - centerX,
+
+                        y: point.y - centerY
+
+                    });
+
+                    if (!normal.x && !normal.y) {
+
+                        return null;
+
+                    }
+
+                    if (normal.x * baseNormal.x + normal.y * baseNormal.y < 0) {
+
+                        normal = { x: -normal.x, y: -normal.y };
+
+                    }
+
+                    return { t, point, normal };
+
+                };
+
+                const hit1 = evaluate(t1);
+
+                const hit2 = evaluate(t2);
+
+                if (hit1 && hit2) {
+
+                    return hit1.t <= hit2.t ? hit1 : hit2;
+
+                }
+
+                return hit1 ?? hit2;
+
+            }
+
+            function findNearestInteraction(origin, direction) {
+
+                let best = null;
+
+                for (const element of state.elements) {
+
+                    if (element.type === 'lens') {
+
+                        if (Math.abs(direction.x) < 1e-6) {
+
+                            continue;
+
+                        }
+
+                        const t = (element.x - origin.x) / direction.x;
+
+                        if (t <= 1e-4) {
+
+                            continue;
+
+                        }
+
+                        const y = origin.y + direction.y * t;
+
+                        if (Math.abs(y - element.y) > element.aperture * 0.5) {
+
+                            continue;
+
+                        }
+
+                        if (!best || t < best.t) {
+
+                            best = {
+
+                                element,
+
+                                t,
+
+                                point: { x: origin.x + direction.x * t, y },
+
+                                kind: 'lens'
+
+                            };
+
+                        }
+
+                    } else if (element.type === 'mirror') {
+
+                        const hit = intersectMirror(element, origin, direction);
+
+                        if (!hit) {
+
+                            continue;
+
+                        }
+
+                        if (!best || hit.t < best.t) {
+
+                            best = {
+
+                                element,
+
+                                t: hit.t,
+
+                                point: hit.point,
+
+                                normal: normalize(hit.normal),
+
+                                kind: 'mirror'
+
+                            };
+
+                        }
+
+                    }
+
+                }
+
+                return best;
+
+            }
+
+            function computeExitPoint(origin, direction) {
+
+                const bounds = {
+
+                    minX: 0,
+
+                    maxX: SIM.width,
+
+                    minY: -SIM.height * 0.5,
+
+                    maxY: SIM.height * 0.5
+
+                };
+
+                let maxT = 2000;
+
+                if (direction.x > 1e-6) {
+
+                    maxT = Math.min(maxT, (bounds.maxX - origin.x) / direction.x);
+
+                } else if (direction.x < -1e-6) {
+
+                    maxT = Math.min(maxT, (bounds.minX - origin.x) / direction.x);
+
+                }
+
+                if (direction.y > 1e-6) {
+
+                    maxT = Math.min(maxT, (bounds.maxY - origin.y) / direction.y);
+
+                } else if (direction.y < -1e-6) {
+
+                    maxT = Math.min(maxT, (bounds.minY - origin.y) / direction.y);
+
+                }
+
+                if (!isFinite(maxT)) {
+
+                    maxT = 0;
+
+                }
+
+                return {
+
+                    x: origin.x + direction.x * maxT,
+
+                    y: origin.y + direction.y * maxT
+
+                };
+
+            }
+
+            function traceRay(origin, direction) {
+
+                const segments = [];
+
+                let currentOrigin = { ...origin };
+
+                let currentDirection = normalize(direction);
+
+                const maxInteractions = 10;
+
+                for (let i = 0; i < maxInteractions; i++) {
+
+                    const interaction = findNearestInteraction(currentOrigin, currentDirection);
+
+                    if (!interaction) {
+
+                        const endPoint = computeExitPoint(currentOrigin, currentDirection);
+
+                        segments.push({ from: { ...currentOrigin }, to: endPoint });
+
+                        return segments;
+
+                    }
+
+                    const hitPoint = interaction.point;
+
+                    segments.push({ from: { ...currentOrigin }, to: hitPoint });
+
+                    if (interaction.kind === 'lens') {
+
+                        currentDirection = applyLens(currentDirection, hitPoint, interaction.element);
+
+                        currentOrigin = moveAlong(hitPoint, currentDirection, 0.6);
+
+                    } else {
+
+                        currentDirection = reflect(currentDirection, interaction.normal);
+
+                        currentOrigin = moveAlong(hitPoint, currentDirection, 0.6);
+
+                    }
+
+                }
+
+                const fallback = computeExitPoint(currentOrigin, currentDirection);
+
+                segments.push({ from: { ...currentOrigin }, to: fallback });
+
+                return segments;
+
+            }
+
+            function buildRays() {
+
+                const rays = [];
+
+                const count = Math.max(1, state.source.count);
+
+                const spread = state.source.spread * Math.PI / 180;
+
+                const baseAngle = state.source.angle * Math.PI / 180;
+
+                for (let i = 0; i < count; i++) {
+
+                    const lerp = count === 1 ? 0 : i / (count - 1);
+
+                    const offset = spread * (lerp - 0.5);
+
+                    const theta = baseAngle + offset;
+
+                    rays.push({
+
+                        origin: { x: state.source.x, y: state.source.height },
+
+                        direction: { x: Math.cos(theta), y: Math.sin(theta) }
+
+                    });
+
+                }
+
+                return rays;
+
+            }
+
+            function drawBackground() {
+
+                ctx.clearRect(0, 0, viewWidth, viewHeight);
+
+                const gradient = ctx.createLinearGradient(0, 0, 0, viewHeight);
+
+                gradient.addColorStop(0, 'rgba(12, 16, 42, 0.95)');
+
+                gradient.addColorStop(1, 'rgba(5, 7, 24, 0.95)');
+
+                ctx.fillStyle = gradient;
+
+                ctx.fillRect(0, 0, viewWidth, viewHeight);
+
+                ctx.strokeStyle = 'rgba(140, 160, 255, 0.22)';
+
+                ctx.setLineDash([6, 6]);
+
+                ctx.lineWidth = 1;
+
+                ctx.beginPath();
+
+                ctx.moveTo(mapX(0), mapY(0));
+
+                ctx.lineTo(mapX(SIM.width), mapY(0));
+
+                ctx.stroke();
+
+                ctx.setLineDash([]);
+
+            }
+
+            function drawSource() {
+
+                const center = toCanvas({ x: state.source.x, y: state.source.height });
+
+                const glow = ctx.createRadialGradient(center.x, center.y, 0, center.x, center.y, 18);
+
+                glow.addColorStop(0, 'rgba(255, 200, 130, 0.95)');
+
+                glow.addColorStop(1, 'rgba(255, 200, 130, 0)');
+
+                ctx.fillStyle = glow;
+
+                ctx.beginPath();
+
+                ctx.arc(center.x, center.y, 18, 0, Math.PI * 2);
+
+                ctx.fill();
+
+                ctx.fillStyle = '#ffb36c';
+
+                ctx.beginPath();
+
+                ctx.arc(center.x, center.y, 4.8, 0, Math.PI * 2);
+
+                ctx.fill();
+
+            }
+
+            function drawElements() {
+
+                for (const element of state.elements) {
+
+                    if (element.type === 'lens') {
+
+                        drawLens(element);
+
+                    } else {
+
+                        drawMirror(element);
+
+                    }
+
+                }
+
+            }
+
+            function drawLens(lens) {
+
+                const xCenter = mapX(lens.x);
+
+                const top = mapY(lens.y + lens.aperture * 0.5);
+
+                const bottom = mapY(lens.y - lens.aperture * 0.5);
+
+                const lensWidth = Math.max(4, mapX(lens.x + 4) - mapX(lens.x - 4));
+
+                const height = bottom - top;
+
+                const fill = ctx.createLinearGradient(xCenter - lensWidth / 2, 0, xCenter + lensWidth / 2, 0);
+
+                fill.addColorStop(0, 'rgba(130, 180, 255, 0.08)');
+
+                fill.addColorStop(0.5, 'rgba(98, 196, 255, 0.55)');
+
+                fill.addColorStop(1, 'rgba(130, 180, 255, 0.08)');
+
+                ctx.fillStyle = fill;
+
+                ctx.strokeStyle = 'rgba(120, 190, 255, 0.7)';
+
+                ctx.lineWidth = 1.4;
+
+                ctx.beginPath();
+
+                ctx.rect(xCenter - lensWidth / 2, top, lensWidth, height);
+
+                ctx.fill();
+
+                ctx.stroke();
+
+            }
+
+            function drawMirror(mirror) {
+
+                if (Math.abs(mirror.radiusOfCurvature ?? 0) > 5) {
+
+                    drawSphericalMirror(mirror);
+
+                    return;
+
+                }
+
+                const angle = mirror.angle * Math.PI / 180;
+
+                const tangent = { x: Math.sin(angle), y: Math.cos(angle) };
+
+                const half = mirror.length * 0.5;
+
+                const startWorld = {
+
+                    x: mirror.x - tangent.x * half,
+
+                    y: mirror.y - tangent.y * half
+
+                };
+
+                const endWorld = {
+
+                    x: mirror.x + tangent.x * half,
+
+                    y: mirror.y + tangent.y * half
+
+                };
+
+                const start = toCanvas(startWorld);
+
+                const end = toCanvas(endWorld);
+
+                const hole = Math.max(0, Math.min(mirror.holeRadius ?? 0, half));
+
+                ctx.strokeStyle = '#ffd166';
+
+                ctx.lineWidth = 3.2;
+
+                ctx.beginPath();
+
+                if (hole > 1) {
+
+                    const leftWorld = {
+
+                        x: mirror.x - tangent.x * hole,
+
+                        y: mirror.y - tangent.y * hole
+
+                    };
+
+                    const rightWorld = {
+
+                        x: mirror.x + tangent.x * hole,
+
+                        y: mirror.y + tangent.y * hole
+
+                    };
+
+                    const left = toCanvas(leftWorld);
+
+                    const right = toCanvas(rightWorld);
+
+                    ctx.moveTo(start.x, start.y);
+
+                    ctx.lineTo(left.x, left.y);
+
+                    ctx.moveTo(right.x, right.y);
+
+                    ctx.lineTo(end.x, end.y);
+
+                    ctx.stroke();
+
+                    const center = toCanvas({ x: mirror.x, y: mirror.y });
+
+                    const radiusPx = Math.hypot(right.x - center.x, right.y - center.y);
+
+                    ctx.save();
+
+                    ctx.strokeStyle = 'rgba(255, 209, 102, 0.6)';
+
+                    ctx.lineWidth = 1;
+
+                    ctx.setLineDash([4, 4]);
+
+                    ctx.beginPath();
+
+                    ctx.arc(center.x, center.y, Math.max(4, radiusPx), 0, Math.PI * 2);
+
+                    ctx.stroke();
+
+                    ctx.restore();
+
+                } else {
+
+                    ctx.moveTo(start.x, start.y);
+
+                    ctx.lineTo(end.x, end.y);
+
+                    ctx.stroke();
+
+                }
+
+            }
+
+            function drawSphericalMirror(mirror) {
+
+                const baseAngle = mirror.angle * Math.PI / 180;
+
+                const R = Math.abs(mirror.radiusOfCurvature);
+
+                const aperture = mirror.aperture ?? 180;
+
+                const normal = { x: Math.cos(baseAngle), y: -Math.sin(baseAngle) };
+
+                const isConcave = mirror.radiusOfCurvature > 0;
+
+                const centerX = mirror.x + normal.x * (isConcave ? R : -R);
+
+                const centerY = mirror.y + normal.y * (isConcave ? R : -R);
+
+                const centerCanvas = toCanvas({ x: centerX, y: centerY });
+
+                const radiusCanvas = Math.abs(R / SIM.width * viewWidth);
+
+                const halfAperture = aperture * 0.5;
+
+                const tangent = { x: Math.sin(baseAngle), y: Math.cos(baseAngle) };
+
+                const point1World = {
+
+                    x: mirror.x - tangent.x * halfAperture,
+
+                    y: mirror.y - tangent.y * halfAperture
+
+                };
+
+                const point2World = {
+
+                    x: mirror.x + tangent.x * halfAperture,
+
+                    y: mirror.y + tangent.y * halfAperture
+
+                };
+
+                const point1 = toCanvas(point1World);
+
+                const point2 = toCanvas(point2World);
+
+                const angle1 = Math.atan2(point1.y - centerCanvas.y, point1.x - centerCanvas.x);
+
+                const angle2 = Math.atan2(point2.y - centerCanvas.y, point2.x - centerCanvas.x);
+
+                let angleStart = angle1;
+
+                let angleEnd = angle2;
+
+                if (isConcave) {
+
+                    if (angle2 < angle1) {
+
+                        angleEnd += Math.PI * 2;
+
+                    }
+
+                } else {
+
+                    if (angle1 < angle2) {
+
+                        angleStart += Math.PI * 2;
+
+                    }
+
+                }
+
+                ctx.strokeStyle = '#ffd166';
+
+                ctx.lineWidth = 3.2;
+
+                const hole = Math.max(0, Math.min(mirror.holeRadius ?? 0, halfAperture));
+
+                if (hole > 5) {
+
+                    const leftWorld = {
+
+                        x: mirror.x - tangent.x * hole,
+
+                        y: mirror.y - tangent.y * hole
+
+                    };
+
+                    const rightWorld = {
+
+                        x: mirror.x + tangent.x * hole,
+
+                        y: mirror.y + tangent.y * hole
+
+                    };
+
+                    const left = toCanvas(leftWorld);
+
+                    const right = toCanvas(rightWorld);
+
+                    const angleLeft = Math.atan2(left.y - centerCanvas.y, left.x - centerCanvas.x);
+
+                    const angleRight = Math.atan2(right.y - centerCanvas.y, right.x - centerCanvas.x);
+
+                    let angleLeftAdj = angleLeft;
+
+                    let angleRightAdj = angleRight;
+
+                    if (isConcave) {
+
+                        if (angleLeftAdj < angle1) angleLeftAdj += Math.PI * 2;
+
+                        if (angleRightAdj < angle1) angleRightAdj += Math.PI * 2;
+
+                    } else {
+
+                        if (angleLeftAdj > angleStart) angleLeftAdj -= Math.PI * 2;
+
+                        if (angleRightAdj > angleStart) angleRightAdj -= Math.PI * 2;
+
+                    }
+
+                    ctx.beginPath();
+
+                    ctx.arc(centerCanvas.x, centerCanvas.y, radiusCanvas, angleStart, angleLeftAdj, !isConcave);
+
+                    ctx.stroke();
+
+                    ctx.beginPath();
+
+                    ctx.arc(centerCanvas.x, centerCanvas.y, radiusCanvas, angleRightAdj, angleEnd, !isConcave);
+
+                    ctx.stroke();
+
+                    const center = toCanvas({ x: mirror.x, y: mirror.y });
+
+                    const holePx = hole / SIM.width * viewWidth;
+
+                    ctx.save();
+
+                    ctx.strokeStyle = 'rgba(255, 209, 102, 0.6)';
+
+                    ctx.lineWidth = 1;
+
+                    ctx.setLineDash([4, 4]);
+
+                    ctx.beginPath();
+
+                    ctx.arc(center.x, center.y, Math.max(4, holePx), 0, Math.PI * 2);
+
+                    ctx.stroke();
+
+                    ctx.restore();
+
+                } else {
+
+                    ctx.beginPath();
+
+                    ctx.arc(centerCanvas.x, centerCanvas.y, radiusCanvas, angleStart, angleEnd, !isConcave);
+
+                    ctx.stroke();
+
+                }
+
+                ctx.save();
+
+                ctx.strokeStyle = 'rgba(255, 209, 102, 0.3)';
+
+                ctx.lineWidth = 1;
+
+                ctx.setLineDash([2, 3]);
+
+                ctx.beginPath();
+
+                ctx.moveTo(point1.x, point1.y);
+
+                const centerMirror = toCanvas({ x: mirror.x, y: mirror.y });
+
+                ctx.lineTo(centerMirror.x, centerMirror.y);
+
+                ctx.lineTo(point2.x, point2.y);
+
+                ctx.stroke();
+
+                ctx.restore();
+
+            }
+
+            function drawRays() {
+
+                const rays = buildRays();
+
+                const colors = ['#7cd9ff', '#9fe5ff', '#b2f0ff'];
+
+                rays.forEach((ray, index) => {
+
+                    const segments = traceRay(ray.origin, ray.direction);
+
+                    ctx.lineWidth = 1.6;
+
+                    ctx.strokeStyle = colors[index % colors.length];
+
+                    ctx.beginPath();
+
+                    segments.forEach((segment, segmentIndex) => {
+
+                        const start = toCanvas(segment.from);
+
+                        const end = toCanvas(segment.to);
+
+                        if (segmentIndex === 0) {
+
+                            ctx.moveTo(start.x, start.y);
+
+                        } else {
+
+                            ctx.lineTo(start.x, start.y);
+
+                        }
+
+                        ctx.lineTo(end.x, end.y);
+
+                    });
+
+                    ctx.stroke();
+
+                });
+
+            }
+
+            function render() {
+
+                if (!needsRedraw) {
+
+                    return;
+
+                }
+
+                drawBackground();
+
+                drawElements();
+
+                drawSource();
+
+                drawRays();
+
+                needsRedraw = false;
+
+            }
+
+            function loop() {
+
+                render();
+
+                requestAnimationFrame(loop);
+
+            }
+
+            loop();
+
+        })();
+
     </script>
+
 </body>
+
 </html>
+
+
